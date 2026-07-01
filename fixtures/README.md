@@ -9,14 +9,14 @@ not here.)
 |------|------|
 | `schema/BTLx_2_3_1.xsd` | The canonical BTLx 2.3.1 schema, verbatim from [design2machine](https://www.design2machine.com/btlx/schema.html). |
 | `schema/BTLx_2_3_1.offline.xsd` | The same schema with the one external `<xs:include>` (the X3D shape-geometry extension, fetched over the network) and the unused `ShapeType` removed, so it compiles and validates **offline**. We never emit `<Shape>`, so this validates the exact subset we produce. |
-| `sample-drilling.btlx` | Output of `cargo run --example emit` — a 3 m beam with two drillings. Regenerate it, don't hand-edit. |
+| `sample.btlx` | Output of `cargo run --example emit` — a 3 m beam with a rafter cut, lap, mortise, tenon and a drilling. Regenerate it, don't hand-edit. |
 
 ## Validate our output against the schema
 
 ```sh
-cargo run --example emit > fixtures/sample-drilling.btlx
-xmllint --noout --schema fixtures/schema/BTLx_2_3_1.offline.xsd fixtures/sample-drilling.btlx
-# -> fixtures/sample-drilling.btlx validates
+cargo run --example emit > fixtures/sample.btlx
+xmllint --noout --schema fixtures/schema/BTLx_2_3_1.offline.xsd fixtures/sample.btlx
+# -> fixtures/sample.btlx validates
 ```
 
 The canonical `BTLx_2_3_1.xsd` will *fail* to compile under xmllint offline

@@ -19,7 +19,10 @@
 
 pub mod model;
 
-pub use model::{Btlx, Drilling, Part, Parts, Processing, Processings, Project, RefPlane};
+pub use model::{
+    Btlx, Drilling, JackRafterCut, Lap, Mortise, Orientation, Part, Parts, Processing, Processings,
+    Project, RefPlane, Tenon,
+};
 
 /// Render a BTLx document to an indented XML string, with the standard
 /// declaration header.
@@ -45,19 +48,55 @@ mod tests {
         let part = Part::new(3000.0, 160.0, 80.0)
             .designation("beam-1")
             .with_processings(vec![
-                Processing::Drilling(Drilling::new(
-                    "bolt-hole-1",
+                Processing::JackRafterCut(JackRafterCut::new(
+                    "jack-cut-start",
                     1,
+                    RefPlane::Global(1),
+                    Orientation::Start,
+                    0.0,
+                    45.0,
+                )),
+                Processing::Lap(Lap::new(
+                    "halving",
+                    2,
+                    RefPlane::Global(3),
+                    Orientation::End,
+                    2800.0,
+                    0.0,
+                    160.0,
+                    80.0,
+                    40.0,
+                )),
+                Processing::Mortise(Mortise::new(
+                    "mortise-1",
+                    3,
+                    RefPlane::Global(1),
+                    1500.0,
+                    40.0,
+                    100.0,
+                    40.0,
+                    60.0,
+                )),
+                Processing::Tenon(Tenon::new(
+                    "tenon-1",
+                    4,
+                    RefPlane::Global(2),
+                    Orientation::Start,
+                    0.0,
+                    40.0,
+                    50.0,
+                    40.0,
+                    40.0,
+                )),
+                Processing::Drilling(Drilling::new(
+                    "bolt-hole",
+                    5,
                     RefPlane::Global(3),
                     500.0,
                     80.0,
                     80.0,
                     12.0,
                 )),
-                Processing::Drilling(
-                    Drilling::new("angled", 2, RefPlane::Global(1), 1500.0, 40.0, 60.0, 10.0)
-                        .inclination(45.0),
-                ),
             ]);
         Btlx::new(Project::new("demo-project", vec![part]))
     }
@@ -72,11 +111,14 @@ mod tests {
         // Project + part dimensions as attributes.
         assert!(xml.contains("<Project Name=\"demo-project\""));
         assert!(xml.contains("Length=\"3000\""));
-        // Two drillings, geometry as child elements.
-        assert_eq!(xml.matches("<Drilling").count(), 2);
-        assert!(xml.contains("<Diameter>12</Diameter>"));
-        assert!(xml.contains("<Inclination>45</Inclination>"));
-        // ReferencePlaneID carried as attribute.
+        // All five processing types present.
+        for tag in ["<JackRafterCut", "<Lap", "<Mortise", "<Tenon", "<Drilling"] {
+            assert!(xml.contains(tag), "missing {tag}");
+        }
+        // Orientation serialises as start/end; identity as attributes.
+        assert!(xml.contains("<Orientation>start</Orientation>"));
+        assert!(xml.contains("<Orientation>end</Orientation>"));
         assert!(xml.contains("ReferencePlaneID=\"3\""));
+        assert!(xml.contains("<Diameter>12</Diameter>"));
     }
 }

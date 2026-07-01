@@ -68,7 +68,7 @@ pub const PROCESSING_TYPES: &[&str] = &[
 
 /// Processing types this crate's serialiser can currently *produce*. Everything
 /// else in [`PROCESSING_TYPES`] we can read/recognise but not yet write.
-pub const SERIALISABLE: &[&str] = &["Drilling"];
+pub const SERIALISABLE: &[&str] = &["Lap", "JackRafterCut", "Drilling", "Mortise", "Tenon"];
 
 /// What an inspection found in a `.btlx` file.
 #[derive(Debug, Clone, PartialEq)]
@@ -160,23 +160,25 @@ mod tests {
         let r = inspect_str(xml).unwrap();
         assert_eq!(r.version.as_deref(), Some("2.2.0"));
         assert!(r.parts > 0, "found parts in a real file");
-        // This real file mixes JackRafterCut, Lap and Drilling.
+        // This real file mixes JackRafterCut, Lap and Drilling — all serialisable now.
         assert!(r.processings.contains_key("JackRafterCut"));
         assert!(r.total_processings() >= 5);
-        // We can read Lap/JackRafterCut but not yet serialise them.
-        assert!(r.unsupported().contains(&"JackRafterCut"));
+        assert!(
+            r.unsupported().is_empty(),
+            "we can now write every processing this file uses"
+        );
     }
 
     #[test]
     fn inspects_our_own_emitted_file() {
-        let xml = include_str!("../fixtures/sample-drilling.btlx");
+        let xml = include_str!("../fixtures/sample.btlx");
         let r = inspect_str(xml).unwrap();
         assert_eq!(r.version.as_deref(), Some("2.3.1"));
         assert_eq!(r.parts, 1);
-        assert_eq!(r.processings.get("Drilling"), Some(&2));
-        assert!(
-            r.unsupported().is_empty(),
-            "we can serialise everything we emitted"
-        );
+        // The emitted sample exercises all five serialisable processings.
+        for t in ["Lap", "JackRafterCut", "Mortise", "Tenon", "Drilling"] {
+            assert_eq!(r.processings.get(t), Some(&1), "expected one {t}");
+        }
+        assert!(r.unsupported().is_empty());
     }
 }

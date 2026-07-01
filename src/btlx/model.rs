@@ -154,14 +154,31 @@ impl RefPlane {
     }
 }
 
+/// `Orientation` (`OrientationType`) — which end of the part a processing is
+/// referenced from. Required by `JackRafterCut`, `Lap`, `Tenon`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Orientation {
+    Start,
+    End,
+}
+
 /// A machining step (`ProcessingType`). Externally-tagged so each variant
-/// serialises as its schema element name.
+/// serialises as its schema element name. Covers the processings that dominate
+/// real machine files (Lap, JackRafterCut, Drilling; Mortise/Tenon for joinery);
+/// grow from the XSD as more turn up.
 #[derive(Debug, Clone, Serialize)]
 pub enum Processing {
+    /// `<Lap>` — a housing / halving cut (the most common processing in the wild).
+    Lap(Lap),
+    /// `<JackRafterCut>` — an angled end cut (rafters etc.).
+    JackRafterCut(JackRafterCut),
     /// `<Drilling>` — a bore on a reference plane.
     Drilling(Drilling),
-    // Grow here as sample files confirm usage: JackRafterCut, Mortise, Tenon,
-    // Lap, Pocket, Marking, … (see the XSD for the full list).
+    /// `<Mortise>` — a rectangular pocket for a tenon.
+    Mortise(Mortise),
+    /// `<Tenon>` — a projecting tongue that fits a mortise.
+    Tenon(Tenon),
 }
 
 /// `<Drilling>` (`DrillingType` : `ProcessingType`). Attributes carry the common
@@ -222,5 +239,223 @@ impl Drilling {
     pub fn inclination(mut self, degrees: f64) -> Self {
         self.inclination = degrees;
         self
+    }
+}
+
+/// `<JackRafterCut>` (`JackRafterCutType` : `ProcessingType`) — an angled cut at
+/// one end of the part. Child elements are emitted in the schema's sequence order.
+#[derive(Debug, Clone, Serialize)]
+pub struct JackRafterCut {
+    #[serde(rename = "@Name")]
+    name: String,
+    #[serde(rename = "@ProcessID")]
+    process_id: u32,
+    #[serde(rename = "@ReferencePlaneID")]
+    reference_plane_id: u32,
+    #[serde(rename = "Orientation")]
+    orientation: Orientation,
+    #[serde(rename = "StartX")]
+    start_x: f64,
+    #[serde(rename = "Angle")]
+    angle: f64,
+    #[serde(rename = "Inclination")]
+    inclination: f64,
+}
+
+impl JackRafterCut {
+    /// A cut at `start_x` on `plane`, from the given end, at `angle` degrees
+    /// (90 = square). Inclination defaults to 90; override with [`inclination`].
+    pub fn new(
+        name: impl Into<String>,
+        process_id: u32,
+        plane: RefPlane,
+        orientation: Orientation,
+        start_x: f64,
+        angle: f64,
+    ) -> Self {
+        Self {
+            name: name.into(),
+            process_id,
+            reference_plane_id: plane.id(),
+            orientation,
+            start_x,
+            angle,
+            inclination: 90.0,
+        }
+    }
+
+    pub fn inclination(mut self, degrees: f64) -> Self {
+        self.inclination = degrees;
+        self
+    }
+}
+
+/// `<Lap>` (`LapType` : `ProcessingType`) — a housing / halving cut. The most
+/// common processing in real machine files.
+#[derive(Debug, Clone, Serialize)]
+pub struct Lap {
+    #[serde(rename = "@Name")]
+    name: String,
+    #[serde(rename = "@ProcessID")]
+    process_id: u32,
+    #[serde(rename = "@ReferencePlaneID")]
+    reference_plane_id: u32,
+    #[serde(rename = "Orientation")]
+    orientation: Orientation,
+    #[serde(rename = "StartX")]
+    start_x: f64,
+    #[serde(rename = "StartY")]
+    start_y: f64,
+    #[serde(rename = "Angle")]
+    angle: f64,
+    #[serde(rename = "Inclination")]
+    inclination: f64,
+    #[serde(rename = "Length")]
+    length: f64,
+    #[serde(rename = "Width")]
+    width: f64,
+    #[serde(rename = "Depth")]
+    depth: f64,
+}
+
+impl Lap {
+    /// A lap of `length × width × depth` (mm) starting at `(start_x, start_y)` on
+    /// `plane`, from the given end. Angle/inclination default to 90.
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(
+        name: impl Into<String>,
+        process_id: u32,
+        plane: RefPlane,
+        orientation: Orientation,
+        start_x: f64,
+        start_y: f64,
+        length: f64,
+        width: f64,
+        depth: f64,
+    ) -> Self {
+        Self {
+            name: name.into(),
+            process_id,
+            reference_plane_id: plane.id(),
+            orientation,
+            start_x,
+            start_y,
+            angle: 90.0,
+            inclination: 90.0,
+            length,
+            width,
+            depth,
+        }
+    }
+}
+
+/// `<Mortise>` (`MortiseType` : `ProcessingType`) — a rectangular pocket. No
+/// `Orientation` in the schema.
+#[derive(Debug, Clone, Serialize)]
+pub struct Mortise {
+    #[serde(rename = "@Name")]
+    name: String,
+    #[serde(rename = "@ProcessID")]
+    process_id: u32,
+    #[serde(rename = "@ReferencePlaneID")]
+    reference_plane_id: u32,
+    #[serde(rename = "StartX")]
+    start_x: f64,
+    #[serde(rename = "StartY")]
+    start_y: f64,
+    #[serde(rename = "Inclination")]
+    inclination: f64,
+    #[serde(rename = "Length")]
+    length: f64,
+    #[serde(rename = "Width")]
+    width: f64,
+    #[serde(rename = "Depth")]
+    depth: f64,
+}
+
+impl Mortise {
+    /// A mortise of `length × width × depth` (mm) at `(start_x, start_y)` on
+    /// `plane`. Inclination defaults to 90 (perpendicular).
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(
+        name: impl Into<String>,
+        process_id: u32,
+        plane: RefPlane,
+        start_x: f64,
+        start_y: f64,
+        length: f64,
+        width: f64,
+        depth: f64,
+    ) -> Self {
+        Self {
+            name: name.into(),
+            process_id,
+            reference_plane_id: plane.id(),
+            start_x,
+            start_y,
+            inclination: 90.0,
+            length,
+            width,
+            depth,
+        }
+    }
+}
+
+/// `<Tenon>` (`TenonType` : `ProcessingType`) — a projecting tongue that fits a
+/// mortise.
+#[derive(Debug, Clone, Serialize)]
+pub struct Tenon {
+    #[serde(rename = "@Name")]
+    name: String,
+    #[serde(rename = "@ProcessID")]
+    process_id: u32,
+    #[serde(rename = "@ReferencePlaneID")]
+    reference_plane_id: u32,
+    #[serde(rename = "Orientation")]
+    orientation: Orientation,
+    #[serde(rename = "StartX")]
+    start_x: f64,
+    #[serde(rename = "StartY")]
+    start_y: f64,
+    #[serde(rename = "Angle")]
+    angle: f64,
+    #[serde(rename = "Inclination")]
+    inclination: f64,
+    #[serde(rename = "Length")]
+    length: f64,
+    #[serde(rename = "Width")]
+    width: f64,
+    #[serde(rename = "Height")]
+    height: f64,
+}
+
+impl Tenon {
+    /// A tenon of `length × width × height` (mm) at `(start_x, start_y)` on
+    /// `plane`, from the given end. Angle/inclination default to 90.
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(
+        name: impl Into<String>,
+        process_id: u32,
+        plane: RefPlane,
+        orientation: Orientation,
+        start_x: f64,
+        start_y: f64,
+        length: f64,
+        width: f64,
+        height: f64,
+    ) -> Self {
+        Self {
+            name: name.into(),
+            process_id,
+            reference_plane_id: plane.id(),
+            orientation,
+            start_x,
+            start_y,
+            angle: 90.0,
+            inclination: 90.0,
+            length,
+            width,
+            height,
+        }
     }
 }

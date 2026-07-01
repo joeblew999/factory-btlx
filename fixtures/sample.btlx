@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BTLx xmlns="https://www.design2machine.com" Version="2.3.1">
+  <Project Name="sample-project">
+    <Parts>
+      <Part Designation="beam-1" Count="1" Length="3000" Width="160" Height="80">
+        <Processings>
+          <JackRafterCut Name="rafter-cut" ProcessID="1" ReferencePlaneID="1">
+            <Orientation>start</Orientation>
+            <StartX>0</StartX>
+            <Angle>45</Angle>
+            <Inclination>90</Inclination>
+          </JackRafterCut>
+          <Lap Name="halving" ProcessID="2" ReferencePlaneID="3">
+            <Orientation>end</Orientation>
+            <StartX>2800</StartX>
+            <StartY>0</StartY>
+            <Angle>90</Angle>
+            <Inclination>90</Inclination>
+            <Length>160</Length>
+            <Width>80</Width>
+            <Depth>40</Depth>
+          </Lap>
+          <Mortise Name="mortise" ProcessID="3" ReferencePlaneID="1">
+            <StartX>1500</StartX>
+            <StartY>40</StartY>
+            <Inclination>90</Inclination>
+            <Length>100</Length>
+            <Width>40</Width>
+            <Depth>60</Depth>
+          </Mortise>
+          <Tenon Name="tenon" ProcessID="4" ReferencePlaneID="2">
+            <Orientation>start</Orientation>
+            <StartX>0</StartX>
+            <StartY>40</StartY>
+            <Angle>90</Angle>
+            <Inclination>90</Inclination>
+            <Length>50</Length>
+            <Width>40</Width>
+            <Height>40</Height>
+          </Tenon>
+          <Drilling Name="bolt-hole" ProcessID="5" ReferencePlaneID="3">
+            <StartX>500</StartX>
+            <StartY>80</StartY>
+            <Inclination>90</Inclination>
+            <Depth>80</Depth>
+            <Diameter>12</Diameter>
+          </Drilling>
+        </Processings>
+      </Part>
+    </Parts>
+  </Project>
+</BTLx>

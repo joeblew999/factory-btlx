@@ -83,10 +83,12 @@ Working, and proven against real machine files — not just a scaffold:
 - **`btlx inspect`** reads any real `.btlx` and reports version, parts, and
   the processing histogram. Tested on real 2.0.0 machine exports (see
   [`fixtures/samples`](fixtures/samples/SAMPLES.md)).
-- **Writing:** typed model of the BTLx **document → project → part → processings**;
-  `Drilling` implemented, output **validates against the real BTLx XSD** (`xmllint`).
-  Real-file analysis says **`Lap` and `JackRafterCut` are next** (by far the most
-  common processings in the wild).
+- **Writing:** typed model of the BTLx **document → project → part → processings**.
+  The processings that dominate real machine files are all implemented —
+  **`Lap`, `JackRafterCut`, `Drilling`, `Mortise`, `Tenon`** — and the output
+  **validates against the real BTLx XSD** (`xmllint`). Running `inspect` on a real
+  130-processing machine export now reports *"we can read and write every processing
+  in this file."*
 - `Hundegger` implements the full `factory-machine-model` `MachineDriver` contract.
 - Real files are BTLx **2.0.0 / 2.2.0** in practice; both the 2.0.0 and 2.3.1 schemas
   are in [`fixtures/schema`](fixtures/schema).
@@ -95,8 +97,9 @@ Working, and proven against real machine files — not just a scaffold:
 
 The `inspect` tool is designed to help close these from the field:
 
-- **Which processings.** `inspect` on a shop's own files answers this directly. First
-  real reports say Lap ≫ JackRafterCut > Drilling.
+- **Which processings.** The common set (Lap, JackRafterCut, Drilling, Mortise, Tenon)
+  is done; `inspect` on a shop's own files flags any of the ~45 rarer BTLx processings
+  they use that we don't yet write.
 - **Ingest mechanism.** How Cambium takes a file — watched hot folder, manual import,
   or an API. `run_job` writes a valid file to the dispatch dir as the best-known
   hand-off; swap in the real path once known.
