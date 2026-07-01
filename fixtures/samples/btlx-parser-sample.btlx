@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BTLx xmlns="https://www.design2machine.com" Version="2.0" Language="en">
+  <FileDescription>
+    <Comment>Exemple de toiture — example roof — Beispiel-Dachstuhl</Comment>
+    <FileName>sample.btlx</FileName>
+    <Date>2024-03-17</Date>
+    <Time>09:42:00</Time>
+  </FileDescription>
+  <Project Name="Maison Mathis / Mathis House">
+    <Comment>Demo project shipped with btlx-parser</Comment>
+  </Project>
+  <Parts>
+    <Part SingleMemberNumber="1" AssemblyNumber="ROOF" OrderNumber="0"
+          Designation="Chevron / Rafter" Annotation="" Material="Spruce"
+          TimberGrade="C24" Count="8" Length="4200.0" Width="80.0"
+          Height="160.0" Weight="34.4">
+      <Transformations>
+        <Transformation GUID="a1">
+          <Position>
+            <ReferencePoint X="0" Y="0" Z="0"/>
+            <XVector X="1" Y="0" Z="0"/>
+            <YVector X="0" Y="1" Z="0"/>
+          </Position>
+        </Transformation>
+      </Transformations>
+      <ReferenceSide Side="3" Align="no"/>
+      <Processings>
+        <JackRafterCut Name="Jack rafter cut" Process="yes" Priority="0"
+                       ProcessID="1" Orientation="start" StartX="0.0"
+                       Angle="45.0" Inclination="90.0"/>
+        <JackRafterCut Name="Jack rafter cut" Process="yes" Priority="0"
+                       ProcessID="2" Orientation="end" StartX="4200.0"
+                       Angle="63.0" Inclination="90.0"/>
+        <Drilling Name="Drilling" Process="yes" ProcessID="3" StartX="3800.0"
+                  StartY="40.0" Diameter="12.0" Depth="80.0"/>
+      </Processings>
+    </Part>
+    <Part SingleMemberNumber="2" AssemblyNumber="ROOF" OrderNumber="0"
+          Designation="Panne / Purlin" Annotation="" Material="Glulam GL24h"
+          TimberGrade="GL24h" Count="3" Length="6000.0" Width="120.0"
+          Height="240.0" Weight="103.7">
+      <Processings>
+        <Lap Name="Lap" Process="yes" ProcessID="1" StartX="0.0" Length="120.0"
+             Depth="40.0" Angle="90.0"/>
+        <Mortise Name="Mortise" Process="yes" ProcessID="2" StartX="2000.0"
+                 Width="40.0" Length="100.0" Depth="60.0"/>
+      </Processings>
+    </Part>
+    <Part SingleMemberNumber="3" AssemblyNumber="WALL" OrderNumber="0"
+          Designation="Montant / Stud" Annotation="" Material="Spruce"
+          TimberGrade="C24" Count="24" Length="2600.0" Width="60.0"
+          Height="120.0" Weight="11.2">
+      <Processings>
+        <Tenon Name="Tenon" Process="yes" ProcessID="1" StartX="2600.0"
+               Width="40.0" Length="50.0" Height="120.0"/>
+      </Processings>
+    </Part>
+  </Parts>
+</BTLx>

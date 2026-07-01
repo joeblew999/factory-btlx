@@ -13,6 +13,7 @@ serde = { version = "1", features = ["derive"] }
 quick-xml = { version = "0.37", features = ["serialize"] }
 tokio = { version = "1", features = ["fs", "process", "time", "rt", "macros"] }
 tracing = "0.1"
+clap = { version = "4.6.1", features = ["derive"] }
 
 [dev-dependencies]
 tokio = { version = "1", features = ["fs", "rt", "macros", "rt-multi-thread"] }

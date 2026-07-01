@@ -1,16 +1,21 @@
 # Real-world BTLx samples
 
-Actual `.btlx` files found in public repos, used to check our serialiser against
-reality (not against hand-written toys). Run [`fetch.sh`](fetch.sh) to pull the
-non-vendored ones. **BVX samples are not in here** — a public search turned up
-zero real Hundegger `.bvx` files (the `.bvx` extension collides with a meteorology
+Actual `.btlx` files found in public repos, vendored here (with provenance) so we
+can test our BTLx handling against reality — and against real machine output, not
+hand-written toys. **BVX samples are not in here** — a public search turned up zero
+real Hundegger `.bvx` files (the `.bvx` extension collides with a meteorology
 format), confirming BVX has to come from a shop.
 
-| File | Source | Version | In git? |
-|------|--------|---------|---------|
-| `lignocam-hackathon.btlx` | [markoczy/AECHackaton_ProjectsTalking](https://github.com/markoczy/AECHackaton_ProjectsTalking) | 2.2.0 | ✅ vendored (small demo) |
-| `eth-stencil_60x80.btlx` | [gramaziokohler/coding_architecture_fs26_focus_work](https://github.com/gramaziokohler/coding_architecture_fs26_focus_work) | 2.0.0 | via `fetch.sh` |
-| `easyhops-test.btlx` | [MAS-dfab/easyhops](https://github.com/MAS-dfab/easyhops) | 2.0.0 | via `fetch.sh` |
+| File | Source | Version | Notes |
+|------|--------|---------|-------|
+| `eth-stencil_60x80.btlx` | [gramaziokohler/coding_architecture_fs26_focus_work](https://github.com/gramaziokohler/coding_architecture_fs26_focus_work) | 2.0.0 | real machine export, 38 parts, Lap/JackRafterCut/Drilling |
+| `easyhops-test.btlx` | [MAS-dfab/easyhops](https://github.com/MAS-dfab/easyhops) | 2.0.0 | real export |
+| `lignocam-hackathon.btlx` | [markoczy/AECHackaton_ProjectsTalking](https://github.com/markoczy/AECHackaton_ProjectsTalking) | 2.2.0 | small real export |
+| `btlx-parser-sample.btlx` | [victorwhale/btlx-parser](https://github.com/victorwhale/btlx-parser) | 2.0 | ⚠️ **non-conformant toy** — puts geometry in attributes, not child elements. Kept as a counter-example; do **not** model against it. |
+
+These are third-party files retained for interoperability testing, each attributed
+to its source above. [`fetch.sh`](fetch.sh) re-pulls the machine exports if we ever
+want fresh copies.
 
 ## What these files taught us
 

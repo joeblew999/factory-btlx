@@ -24,6 +24,42 @@ let part = Part::new(3000.0, 160.0, 80.0)          // 3 m beam, 160×80 mm
 let xml = to_xml(&Btlx::new(Project::new("demo", vec![part])))?;   // valid BTLx 2.3.1
 ```
 
+## For factory partners — check it against your own files
+
+You do **not** need to be a programmer or install anything to help us validate this.
+
+1. Go to the [**Releases**](https://github.com/joeblew999/factory-hundegger-driver/releases)
+   page and download the `hundegger-btlx` file for your system
+   (Windows / macOS / Linux).
+2. Open a terminal (on Windows: PowerShell) in the folder where it downloaded, and
+   run it on a `.btlx` file your CAD or machine produced:
+
+   ```
+   hundegger-btlx inspect my-real-file.btlx
+   ```
+
+   It prints the BTLx version, how many parts it found, and every processing type in
+   the file — for example:
+
+   ```
+   Version: 2.0.0
+   Parts:   38
+   Processings (130 total):
+        20  Drilling               [ok]
+        46  JackRafterCut          [read-only]
+        64  Lap                    [read-only]
+
+   We can READ this file. We cannot yet WRITE these processing types: JackRafterCut, Lap.
+   ```
+
+3. **Send us the output** (and the file if you can). It tells us exactly which
+   processings your shop actually uses, so we build those first — this is how we
+   turn "it should work" into "we ran it on your real jobs and it does."
+
+That's the validation loop: your real files drive what we build, and the tool proves
+we read them correctly before anything ever reaches a machine. `hundegger-btlx demo`
+prints a sample BTLx file so you can see what we generate.
+
 ## Why BTLx first
 
 The timber-CNC market has already standardised the hard part. **BTLx is the
@@ -42,39 +78,44 @@ The background research and the customer/market context live in
 
 ## Status
 
-Early scaffold, but the core is proven end-to-end:
+Working, and proven against real machine files — not just a scaffold:
 
-- Typed Rust model of the BTLx **document → project → part → processings** structure.
-- **`Drilling`** as the first concrete processing (the [`Processing`] enum grows as
-  real sample files tell us which processings customers actually use).
-- Output **validates against the real BTLx 2.3.1 XSD** — see
-  [`fixtures/`](fixtures/) and run `xmllint` yourself.
-- `Hundegger` implements the full `MachineDriver` contract, dispatching a BTLx
-  payload to the machine.
+- **`hundegger-btlx inspect`** reads any real `.btlx` and reports version, parts, and
+  the processing histogram. Tested on real 2.0.0 machine exports (see
+  [`fixtures/samples`](fixtures/samples/SAMPLES.md)).
+- **Writing:** typed model of the BTLx **document → project → part → processings**;
+  `Drilling` implemented, output **validates against the real BTLx XSD** (`xmllint`).
+  Real-file analysis says **`Lap` and `JackRafterCut` are next** (by far the most
+  common processings in the wild).
+- `Hundegger` implements the full `factory-machine-model` `MachineDriver` contract.
+- Real files are BTLx **2.0.0 / 2.2.0** in practice; both the 2.0.0 and 2.3.1 schemas
+  are in [`fixtures/schema`](fixtures/schema).
 
 ## Open questions — need a real shop or Hundegger
 
-Desk research can't close these; a single real job bundle would close most:
+The `inspect` tool is designed to help close these from the field:
 
-- **Ingest mechanism.** How Cambium actually takes a file — watched hot folder,
-  manual import, or an API. `run_job` writes a valid file to the dispatch dir as the
-  best-known hand-off; swap in the real path once known.
-- **Telemetry format.** The driver reports only a dispatch counter. Real machine
-  state / job feedback needs a sample of the controller's status-log format.
-- **Which processings.** We have `Drilling`; real files show which of the 40+ BTLx
-  processings (cuts, mortises, tenons, laps, pockets…) customers use, and in what mix.
-- **BTLx vs BVX.** Which format a given customer machine needs.
-
-**The one artifact that unblocks the most:** a real `.btlx`/`.bvx` export from a shop,
-ideally with that machine's output log. See [factory-customers-cnc](https://github.com/joeblew999/factory-customers-cnc)
-for the customer-facing ask.
+- **Which processings.** `inspect` on a shop's own files answers this directly. First
+  real reports say Lap ≫ JackRafterCut > Drilling.
+- **Ingest mechanism.** How Cambium takes a file — watched hot folder, manual import,
+  or an API. `run_job` writes a valid file to the dispatch dir as the best-known
+  hand-off; swap in the real path once known.
+- **Telemetry format.** The driver reports only a dispatch counter; real machine
+  feedback needs a sample of the controller's status-log format.
+- **BTLx vs BVX, and which version.** Which format/version a given customer machine
+  wants. (No public BVX samples exist — must come from a shop.)
 
 ## Develop
 
 ```sh
-cargo test                              # unit + doctests
-cargo run --example emit                # print a sample BTLx to stdout
+cargo test                                        # unit + doctests
+cargo run --bin hundegger-btlx -- inspect fixtures/samples/eth-stencil_60x80.btlx
+cargo run --bin hundegger-btlx -- demo            # print a sample BTLx
 xmllint --noout --schema fixtures/schema/BTLx_2_3_1.offline.xsd fixtures/sample-drilling.btlx
 ```
+
+Prebuilt binaries for Windows / macOS / Linux are published to
+[Releases](https://github.com/joeblew999/factory-hundegger-driver/releases) on each
+`v*` tag (built natively per-OS in CI — no cross-compilation).
 
 License: MIT OR Apache-2.0.

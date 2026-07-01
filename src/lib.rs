@@ -23,6 +23,7 @@
 pub mod btlx;
 pub mod config;
 pub mod driver;
+pub mod inspect;
 
 pub use config::{HundeggerConfig, OutputFormat};
 pub use driver::Hundegger;
