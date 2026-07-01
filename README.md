@@ -107,17 +107,22 @@ The `inspect` tool is designed to help close these from the field:
 
 ## Develop
 
-Quick loop with plain cargo:
+The interface is **mise tasks** — run these, not raw cargo. All tasks are nushell,
+so they behave identically on macOS, Linux and Windows.
 
 ```sh
-cargo test                                        # unit + doctests
-cargo run --bin hundegger-btlx -- inspect fixtures/samples/eth-stencil_60x80.btlx
-cargo run --bin hundegger-btlx -- demo            # print a sample BTLx
-xmllint --noout --schema fixtures/schema/BTLx_2_3_1.offline.xsd fixtures/sample-drilling.btlx
+mise run rust:test                 # cargo test across all targets
+mise run inspect -- fixtures/samples/eth-stencil_60x80.btlx
+mise run demo                      # print a sample BTLx
+mise run validate                  # emit a sample + validate it against the BTLx XSD
+mise run schema                    # re-fetch the XSDs from design2machine + rebuild offline copies
+mise run ci                        # everything CI runs (see below)
 ```
 
-Rust is pinned in [`rust-toolchain.toml`](rust-toolchain.toml) (rustup) — **not**
-mise. `xmllint` is only needed for the schema-validation check.
+Rust is pinned in [`rust-toolchain.toml`](rust-toolchain.toml) (rustup), **never**
+mise. The vendored schemas carry provenance in
+[`fixtures/schema/README.md`](fixtures/schema/README.md); `mise run schema`
+regenerates them.
 
 ## CI & releasing — how binaries reach the factory
 

@@ -23,7 +23,7 @@ includes = [
 #   smoke           — run the built tool on a real machine .btlx (proves it reads
 #                     real files, on every OS).
 [tasks.ci]
-depends = ["bootstrap-check", "rust:test", "smoke"]
+depends = ["bootstrap-check", "rust:test", "validate", "smoke"]
 
 # ── Tuning — bootstrap READS this and projects it into .github/workflows/ ──────
 # Windows is in the RELEASE matrix on purpose: Hundegger Cambium is Windows, so a
@@ -58,6 +58,80 @@ run = '''
 #!/usr/bin/env nu
 def main [] {
   ^cargo run --release --bin hundegger-btlx -- inspect fixtures/samples/lignocam-hackathon.btlx
+}
+'''
+
+# ── Dev-facing tasks — the interface is `mise run`, never raw cargo ────────────
+
+# Run the tool on any .btlx file.   mise run inspect -- path/to/file.btlx
+[tasks.inspect]
+run = '''
+#!/usr/bin/env nu
+def main [file: string] {
+  ^cargo run --quiet --release --bin hundegger-btlx -- inspect $file
+}
+'''
+
+# Print a sample BTLx document.   mise run demo
+[tasks.demo]
+run = '''
+#!/usr/bin/env nu
+def main [] {
+  ^cargo run --quiet --release --bin hundegger-btlx -- demo
+}
+'''
+
+# Emit a sample and validate it against the real BTLx XSD (skips if xmllint absent,
+# so it stays green on Windows runners).   mise run validate
+[tasks.validate]
+run = '''
+#!/usr/bin/env nu
+def main [] {
+  ^cargo run --quiet --release --example emit | save --force fixtures/sample-drilling.btlx
+  if (which xmllint | is-empty) {
+    print "• xmllint not installed — skipping XSD validation"
+    return
+  }
+  ^xmllint --noout --schema fixtures/schema/BTLx_2_3_1.offline.xsd fixtures/sample-drilling.btlx
+  print "✓ emitted BTLx validates against the design2machine 2.3.1 schema"
+}
+'''
+
+# Fetch the BTLx XSDs from design2machine and regenerate the offline (X3D-stripped)
+# copies we validate against. Pure nushell — no curl/sed.   mise run schema
+[tasks.schema]
+run = '''
+#!/usr/bin/env nu
+# Produce an offline-validatable XSD: the canonical schema <xs:include>s an external
+# X3D schema over the network (blocks offline xmllint). We never emit <Shape> (the
+# only X3D user), so strip the include, the Shape element, and the unused ShapeType.
+def offline [src: string, dst: string] {
+  mut out = []
+  mut skip = false
+  for line in (open --raw $src | decode utf-8 | lines) {
+    if ($line | str contains "web3d.org/specifications/x3d") { continue }
+    if ($line | str contains '<xs:element name="Shape" type="ShapeType"') { continue }
+    if ($line | str contains '<xs:complexType name="ShapeType">') { $skip = true; continue }
+    if $skip {
+      if ($line | str contains "</xs:complexType>") { $skip = false }
+      continue
+    }
+    $out = ($out | append $line)
+  }
+  $out | str join (char newline) | save --force $dst
+  print $"✓ ($dst)"
+}
+
+def main [] {
+  let base = "https://www.design2machine.com/btlx"
+  for v in ["2_3_1", "2_0_0"] {
+    let xsd = $"fixtures/schema/BTLx_($v).xsd"
+    # --raw: keep the XSD as text; without it nushell parses the XML into a record.
+    http get --raw $"($base)/BTLx_($v).xsd" | save --force --raw $xsd
+    print $"✓ ($xsd)  ← ($base)/BTLx_($v).xsd"
+  }
+  offline "fixtures/schema/BTLx_2_3_1.xsd" "fixtures/schema/BTLx_2_3_1.offline.xsd"
+  print "done — canonical XSDs from design2machine.com; offline copy regenerated"
 }
 '''
 
