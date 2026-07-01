@@ -43,7 +43,10 @@ run = '''
 #!/usr/bin/env nu
 def main [] {
   ^cargo build --release --bin hundegger-btlx
-  let ver  = (open Cargo.toml | get package.version)
+  # On a tag build use the tag (v0.1.1 -> 0.1.1) so archive names match the release;
+  # fall back to Cargo.toml version locally.
+  let tag  = ($env.GITHUB_REF_NAME? | default "" | str replace -r '^v' '')
+  let ver  = (if ($tag | is-empty) { open Cargo.toml | get package.version } else { $tag })
   let os   = $nu.os-info.name                                      # linux | macos | windows
   let arch = $nu.os-info.arch                                      # x86_64 | aarch64
   let bin  = (if $os == "windows" { "hundegger-btlx.exe" } else { "hundegger-btlx" })
