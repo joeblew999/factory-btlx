@@ -11,4 +11,4 @@ permissions:
 
 jobs:
   upgrade:
-    uses: joeblew999/.github/.github/workflows/reusable-mise-upgrade.yml@main
+    uses: joeblew999/.github/.github/workflows/reusable-mise-upgrade.yml@v0.65.0
