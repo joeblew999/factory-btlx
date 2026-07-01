@@ -1,10 +1,10 @@
 [package]
-name = "factory-hundegger-driver"
+name = "factory-btlx"
 version = "0.1.1"
 edition = "2024"
 license = "MIT OR Apache-2.0"
-description = "Hundegger timber-CNC machine driver for factory-gateway — BTLx serialiser + implements the factory-machine-model MachineDriver contract"
-repository = "https://github.com/joeblew999/factory-hundegger-driver"
+description = "BTLx timber-CNC toolkit — serialiser + inspector CLI, and a Hundegger machine driver for factory-gateway (factory-machine-model MachineDriver)"
+repository = "https://github.com/joeblew999/factory-btlx"
 
 [dependencies]
 factory-machine-model = { git = "https://github.com/joeblew999/factory-machine-model" }

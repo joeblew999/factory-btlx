@@ -1,5 +1,5 @@
 #:schema https://mise.jdx.dev/schema/mise.json
-# factory-hundegger-driver — consumes the joeblew999/.github shared mise task
+# factory-btlx — consumes the joeblew999/.github shared mise task
 # library. `mise run ci` is the WHOLE of CI, and runs identically on your machine
 # and on the GitHub matrix (ubuntu + macOS + windows). See the .github README.
 #
@@ -42,15 +42,15 @@ CI_RELEASE_OS_MATRIX = '["ubuntu-latest", "macos-latest", "windows-latest"]'   #
 run = '''
 #!/usr/bin/env nu
 def main [] {
-  ^cargo build --release --bin hundegger-btlx
+  ^cargo build --release --bin btlx
   # On a tag build use the tag (v0.1.1 -> 0.1.1) so archive names match the release;
   # fall back to Cargo.toml version locally.
   let tag  = ($env.GITHUB_REF_NAME? | default "" | str replace -r '^v' '')
   let ver  = (if ($tag | is-empty) { open Cargo.toml | get package.version } else { $tag })
   let os   = $nu.os-info.name                                      # linux | macos | windows
   let arch = $nu.os-info.arch                                      # x86_64 | aarch64
-  let bin  = (if $os == "windows" { "hundegger-btlx.exe" } else { "hundegger-btlx" })
-  let d    = $"dist/hundegger-btlx_($ver)_($os)_($arch)"
+  let bin  = (if $os == "windows" { "btlx.exe" } else { "btlx" })
+  let d    = $"dist/btlx_($ver)_($os)_($arch)"
   mkdir $d
   cp ($"target/release/($bin)") ($d | path join $bin)
   print $"✓ staged ($d)/($bin)"
@@ -62,7 +62,7 @@ def main [] {
 run = '''
 #!/usr/bin/env nu
 def main [] {
-  ^cargo run --release --bin hundegger-btlx -- inspect fixtures/samples/lignocam-hackathon.btlx
+  ^cargo run --release --bin btlx -- inspect fixtures/samples/lignocam-hackathon.btlx
 }
 '''
 
@@ -73,7 +73,7 @@ def main [] {
 run = '''
 #!/usr/bin/env nu
 def main [file: string] {
-  ^cargo run --quiet --release --bin hundegger-btlx -- inspect $file
+  ^cargo run --quiet --release --bin btlx -- inspect $file
 }
 '''
 
@@ -82,7 +82,7 @@ def main [file: string] {
 run = '''
 #!/usr/bin/env nu
 def main [] {
-  ^cargo run --quiet --release --bin hundegger-btlx -- demo
+  ^cargo run --quiet --release --bin btlx -- demo
 }
 '''
 
@@ -173,10 +173,10 @@ def main [tag?: string] {
   let os   = $nu.os-info.name
   let arch = $nu.os-info.arch
   let dir  = (mktemp -d)
-  ^gh release download $t --pattern $"hundegger-btlx_*_($os)_($arch).tar.gz" --dir $dir --clobber
+  ^gh release download $t --pattern $"btlx_*_($os)_($arch).tar.gz" --dir $dir --clobber
   let tgz = (ls $dir | where name =~ 'tar.gz' | get 0.name)
   ^tar -xzf $tgz -C $dir
-  let bin = ($dir | path join (if $os == "windows" { "hundegger-btlx.exe" } else { "hundegger-btlx" }))
+  let bin = ($dir | path join (if $os == "windows" { "btlx.exe" } else { "btlx" }))
   print $"→ running the ($t) binary for ($os)/($arch):"
   ^$bin demo
   rm -rf $dir

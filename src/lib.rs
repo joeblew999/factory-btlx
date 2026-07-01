@@ -1,4 +1,4 @@
-//! # factory-hundegger-driver
+//! # factory-btlx
 //!
 //! The Hundegger timber-CNC machine driver for the `factory-` family. Two parts:
 //!

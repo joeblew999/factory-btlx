@@ -1,23 +1,23 @@
-//! `hundegger-btlx` — a small command-line tool for the factory floor.
+//! `btlx` — a small command-line tool for the factory floor.
 //!
 //! Built so a shop can validate our BTLx handling against *their* real files
 //! without a Rust toolchain: download the binary for your OS, run it on a `.btlx`
 //! your CAD or machine produced.
 //!
-//!   hundegger-btlx inspect path/to/your-file.btlx
-//!   hundegger-btlx demo > sample.btlx
+//!   btlx inspect path/to/your-file.btlx
+//!   btlx demo > sample.btlx
 
 use std::path::PathBuf;
 use std::process::ExitCode;
 
 use clap::{Parser, Subcommand};
 
-use factory_hundegger_driver::btlx::{model::*, to_xml};
-use factory_hundegger_driver::inspect::{SERIALISABLE, inspect_str};
+use factory_btlx::btlx::{model::*, to_xml};
+use factory_btlx::inspect::{SERIALISABLE, inspect_str};
 
 #[derive(Parser)]
 #[command(
-    name = "hundegger-btlx",
+    name = "btlx",
     version,
     about = "Read and write Hundegger BTLx timber-CNC files"
 )]

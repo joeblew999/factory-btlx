@@ -5,7 +5,7 @@
 //! xmllint --noout --schema fixtures/schema/BTLx_2_3_1.xsd fixtures/sample-drilling.btlx
 //! ```
 
-use factory_hundegger_driver::btlx::{model::*, to_xml};
+use factory_btlx::btlx::{model::*, to_xml};
 
 fn main() -> anyhow::Result<()> {
     // A 3 m beam, 160×80 mm, with two bolt holes on different reference planes.

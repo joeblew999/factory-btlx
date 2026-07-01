@@ -5,7 +5,7 @@
 //! validates against `fixtures/schema/BTLx_2_3_1.xsd`.
 //!
 //! ```
-//! use factory_hundegger_driver::btlx::{model::*, to_xml};
+//! use factory_btlx::btlx::{model::*, to_xml};
 //!
 //! let part = Part::new(3000.0, 160.0, 80.0)
 //!     .designation("beam-1")

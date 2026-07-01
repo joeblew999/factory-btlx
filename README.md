@@ -1,4 +1,4 @@
-# factory-hundegger-driver
+# factory-btlx
 
 The **Hundegger** timber-CNC machine driver for the [factory-floor](https://github.com/joeblew999/factory-floor)
 stack — sibling to [factory-howick-driver](https://github.com/joeblew999/factory-howick-driver)
@@ -14,7 +14,7 @@ stack — sibling to [factory-howick-driver](https://github.com/joeblew999/facto
   reports state, so the gateway exposes a standard OPC-UA address space.
 
 ```rust
-use factory_hundegger_driver::btlx::{model::*, to_xml};
+use factory_btlx::btlx::{model::*, to_xml};
 
 let part = Part::new(3000.0, 160.0, 80.0)          // 3 m beam, 160×80 mm
     .designation("beam-1")
@@ -28,14 +28,14 @@ let xml = to_xml(&Btlx::new(Project::new("demo", vec![part])))?;   // valid BTLx
 
 You do **not** need to be a programmer or install anything to help us validate this.
 
-1. Go to the [**Releases**](https://github.com/joeblew999/factory-hundegger-driver/releases)
-   page and download the `hundegger-btlx` file for your system
+1. Go to the [**Releases**](https://github.com/joeblew999/factory-btlx/releases)
+   page and download the `btlx` file for your system
    (Windows / macOS / Linux).
 2. Open a terminal (on Windows: PowerShell) in the folder where it downloaded, and
    run it on a `.btlx` file your CAD or machine produced:
 
    ```
-   hundegger-btlx inspect my-real-file.btlx
+   btlx inspect my-real-file.btlx
    ```
 
    It prints the BTLx version, how many parts it found, and every processing type in
@@ -57,7 +57,7 @@ You do **not** need to be a programmer or install anything to help us validate t
    turn "it should work" into "we ran it on your real jobs and it does."
 
 That's the validation loop: your real files drive what we build, and the tool proves
-we read them correctly before anything ever reaches a machine. `hundegger-btlx demo`
+we read them correctly before anything ever reaches a machine. `btlx demo`
 prints a sample BTLx file so you can see what we generate.
 
 ## Why BTLx first
@@ -80,7 +80,7 @@ The background research and the customer/market context live in
 
 Working, and proven against real machine files — not just a scaffold:
 
-- **`hundegger-btlx inspect`** reads any real `.btlx` and reports version, parts, and
+- **`btlx inspect`** reads any real `.btlx` and reports version, parts, and
   the processing histogram. Tested on real 2.0.0 machine exports (see
   [`fixtures/samples`](fixtures/samples/SAMPLES.md)).
 - **Writing:** typed model of the BTLx **document → project → part → processings**;
@@ -157,7 +157,7 @@ mise run release:github -- v0.1.0      # changelog → tag → GitHub release �
 ```
 
 Downloadable binaries land on the
-[Releases](https://github.com/joeblew999/factory-hundegger-driver/releases) page for
+[Releases](https://github.com/joeblew999/factory-btlx/releases) page for
 Windows / macOS / Linux. `mise run run-bin` fetches and runs the published binary for
 your OS.
 
