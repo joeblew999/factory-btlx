@@ -22,8 +22,10 @@ includes = [
 #                     the matrix builds a linux/macOS/windows binary each).
 #   smoke           — run the built tool on a real machine .btlx (proves it reads
 #                     real files, on every OS).
+# `validate` is a LOCAL check (it needs xmllint, which isn't on the runners) — it is
+# deliberately NOT in this list. CI proves the code via rust:test + smoke.
 [tasks.ci]
-depends = ["bootstrap-check", "rust:test", "validate", "smoke"]
+depends = ["bootstrap-check", "rust:test", "smoke"]
 
 # ── Tuning — bootstrap READS this and projects it into .github/workflows/ ──────
 # Windows is in the RELEASE matrix on purpose: Hundegger Cambium is Windows, so a
@@ -81,18 +83,22 @@ def main [] {
 }
 '''
 
-# Emit a sample and validate it against the real BTLx XSD (skips if xmllint absent,
-# so it stays green on Windows runners).   mise run validate
+# Local check: emit a fresh sample to a TEMP file and validate it against the real
+# BTLx XSD. Never touches the committed fixture (which tests read via include_str!),
+# so it's safe even though mise runs tasks in parallel. Needs xmllint.
+#   mise run validate
 [tasks.validate]
 run = '''
 #!/usr/bin/env nu
 def main [] {
-  ^cargo run --quiet --release --example emit | save --force fixtures/sample-drilling.btlx
   if (which xmllint | is-empty) {
-    print "• xmllint not installed — skipping XSD validation"
+    print "• xmllint not installed — install libxml2 to run this check"
     return
   }
-  ^xmllint --noout --schema fixtures/schema/BTLx_2_3_1.offline.xsd fixtures/sample-drilling.btlx
+  let tmp = (mktemp --suffix .btlx)
+  ^cargo run --quiet --release --example emit | save --force --raw $tmp
+  ^xmllint --noout --schema fixtures/schema/BTLx_2_3_1.offline.xsd $tmp
+  rm --force $tmp
   print "✓ emitted BTLx validates against the design2machine 2.3.1 schema"
 }
 '''
