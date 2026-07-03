@@ -23,19 +23,19 @@ not a fact.
 
 <!-- gen:makers -->
 
-| Manufacturer | Country | Segment | Format(s) | Popularity | Source |
-|---|---|---|---|---|---|
-| Hundegger | DE | joinery / beam CNC | BTLx (via Cambium); BVX (native) | leader | hundegger.com; Tekla |
-| Weinmann (HOMAG Group) | DE | timber-frame / prefab / wall & panel lines | BTL; BTLx | leader | homag.com; ansvarcad |
-| Essetre | IT | beam CNC / mass timber (glulam, CLT) | BTL (BTL10) | major | timbertools.com; essetre-na.com; ansvarcad |
-| Krüsi / Krusimatic | CH | joinery / length / log-home CNC | BTL | established | krusi.com; timbertools.com |
-| Randek | SE | prefab framing / wall lines / cut saws | to confirm | major | archiframe.fi |
-| SCM | IT | woodworking / timber construction | BTL (BTL10) | major | ansvarcad |
-| Schmidler | DE | timber CNC | BTL (BTL10) | niche | ansvarcad |
-| Baljer & Zembrod | DE | glulam / beam processing | to confirm | niche | cadwork.com |
-| CMS | IT | CNC (general + timber) | to confirm | unknown | cadwork.com |
-| Stromab | IT | cut saws | to confirm | niche | archiframe.fi |
-| Creneau Industriel | BE | framing / prefab | to confirm | unknown | cadwork.com |
+| Manufacturer | Country | Segment | BTL | BTLx | BVX | Drive today? | Popularity | Source |
+|---|---|---|:---:|:----:|:---:|---|---|---|
+| Hundegger | DE | joinery | ✓ | ✓ | ✓ | **yes** (BTLx) | leader | hundegger.com; Tekla |
+| Weinmann (HOMAG Group) | DE | framing | ✓ | ✓ | ✗ | **yes** (BTLx) | leader | homag.com; ansvarcad |
+| Essetre | IT | mass-timber | ✓ | ? | ✗ | ? | major | timbertools.com; essetre-na.com; ansvarcad |
+| Krüsi (Krusimatic) | CH | joinery | ✓ | ? | ✗ | ? | established | krusi.com; timbertools.com |
+| Randek | SE | framing | ? | ? | ✗ | ? | major | archiframe.fi |
+| SCM | IT | multi | ✓ | ? | ✗ | ? | major | ansvarcad |
+| Schmidler | DE | joinery | ✓ | ? | ✗ | ? | niche | ansvarcad |
+| Baljer & Zembrod | DE | mass-timber | ? | ? | ✗ | ? | niche | cadwork.com |
+| CMS | IT | multi | ? | ? | ✗ | ? | unknown | cadwork.com |
+| Stromab | IT | cutting | ? | ? | ✗ | ? | niche | archiframe.fi |
+| Creneau Industriel | BE | framing | ? | ? | ✗ | ? | unknown | cadwork.com |
 <!-- /gen:makers -->
 
 **The steer:** the two biggest players are in *different* segments — **Hundegger**
@@ -113,11 +113,13 @@ non-Hundegger customer needs it.
 Edit the JSONL, then `mise run machines` to regenerate both tables. Every row needs a
 `source`; unknowns stay `(to confirm)` — don't guess.
 
-- **A maker** → [`makers.jsonl`](makers.jsonl): `manufacturer`, `country`, `segment`,
-  `formats`, `popularity` (leader/major/established/niche/unknown), `basis`, `source`,
-  `notes`. Confirm the *dialect* — many makers read the older **BTL**, not necessarily
-  **BTLx** (see the format picture). `popularity` is a qualitative steer, not sales
-  data.
+- **A maker** → [`makers.jsonl`](makers.jsonl). Queryable fields: `manufacturer`,
+  `group`, `country`, `segment` (joinery/framing/panel/cutting/mass-timber/multi),
+  `reads_btl` / `reads_btlx` / `reads_bvx` (**`true` / `false` / `null`=unverified** —
+  this is what makes "who can we drive?" answerable), `popularity`
+  (leader/major/established/niche/unknown), `confidence` (high/medium/low), `source`,
+  `notes`. Never guess a format to `true` — leave it `null` until sourced. Example
+  query: `open makers.jsonl | lines | each {from json} | where reads_btlx == true`.
 - **A Hundegger model** → [`machines.jsonl`](machines.jsonl): `manufacturer`, `model`,
   `family`, `controller`, `format`, `format_via`, `format_confirmed` (bool), `source`,
   `notes`. Confirmed from a real shop file → set the format and cite it (e.g.

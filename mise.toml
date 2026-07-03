@@ -159,12 +159,15 @@ def splice [md: string, name: string, table: string] {
   let after = ($md | split row $c | get 1)
   $"($before)($o)\n\n($table)\n($c)($after)"
 }
+def mark [v] { if $v == null { "?" } else if $v { "✓" } else { "✗" } }
 def main [] {
-  # Makers overview.
+  # Makers overview — rendered from the queryable per-format booleans.
   let makers = (rows "reference/makers.jsonl")
-  mut m = ["| Manufacturer | Country | Segment | Format(s) | Popularity | Source |" "|---|---|---|---|---|---|"]
+  mut m = ["| Manufacturer | Country | Segment | BTL | BTLx | BVX | Drive today? | Popularity | Source |" "|---|---|---|:---:|:----:|:---:|---|---|---|"]
   for r in $makers {
-    $m = ($m | append $"| ($r.manufacturer) | ($r.country) | ($r.segment) | ($r.formats) | ($r.popularity) | ($r.source) |")
+    let name = (if ($r.group == null) { $r.manufacturer } else { $"($r.manufacturer) \(($r.group)\)" })
+    let drive = (if $r.reads_btlx == true { "**yes** (BTLx)" } else if $r.reads_btlx == null { "?" } else { "no" })
+    $m = ($m | append $"| ($name) | ($r.country) | ($r.segment) | (mark $r.reads_btl) | (mark $r.reads_btlx) | (mark $r.reads_bvx) | ($drive) | ($r.popularity) | ($r.source) |")
   }
   # Hundegger model detail, grouped by manufacturer.
   let machines = (rows "reference/machines.jsonl")
@@ -183,7 +186,14 @@ def main [] {
   $md = (splice $md "makers" ($m | str join (char newline)))
   $md = (splice $md "machines" ($x | str join (char newline)))
   $md | save --force reference/machines.md
+  # Prove the data is queryable: answer "who can we drive?" straight from the JSONL.
+  let drive_now = ($makers | where reads_btlx == true)
+  let btl_only = ($makers | where reads_btlx != true and reads_btl == true)
+  let unknown = ($makers | where reads_btlx == null and reads_btl == null)
   print $"✓ regenerated tables — ($makers | length) makers, ($machines | length) machines"
+  print $"  BTLx today \(we drive\): ($drive_now | get manufacturer | str join ', ')"
+  print $"  BTL-only \(need BTL serialiser\): ($btl_only | get manufacturer | str join ', ')"
+  print $"  dialect unknown \(confirm\): ($unknown | get manufacturer | str join ', ')"
 }
 '''
 
