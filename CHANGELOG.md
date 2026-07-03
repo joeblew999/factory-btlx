@@ -1,8 +1,26 @@
+## [0.3.0] - 2026-07-03
+
+### 💼 Other
+
+- Start a sourced machine catalogue (reference/machines.md)
+- Correct the cross-vendor format claim (was an assumption)
+- Maker-level catalogue (makers.jsonl) with format + popularity
+- Make makers.jsonl actually queryable
+- Resolve unverified formats from research
+- Full dispatch→telemetry loop + machine simulator
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump .github pins to v0.67.1 (#1)
 ## [0.2.0] - 2026-07-01
 
 ### 💼 Other
 
 - Implement the processings that dominate real machine files
+
+### ⚙️ Miscellaneous Tasks
+
+- *(release)* V0.2.0
 ## [0.1.2] - 2026-07-01
 
 ### 💼 Other
