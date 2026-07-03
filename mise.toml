@@ -9,10 +9,10 @@
 
 [task_config]
 includes = [
-  "git::https://github.com/joeblew999/.github.git//tasks/mise.toml?ref=v0.65.0",
-  "git::https://github.com/joeblew999/.github.git//tasks/ci.toml?ref=v0.65.0",
-  "git::https://github.com/joeblew999/.github.git//tasks/tool-rust.toml?ref=v0.65.0",
-  "git::https://github.com/joeblew999/.github.git//tasks/release.toml?ref=v0.65.0",
+  "git::https://github.com/joeblew999/.github.git//tasks/mise.toml?ref=v0.67.1",
+  "git::https://github.com/joeblew999/.github.git//tasks/ci.toml?ref=v0.67.1",
+  "git::https://github.com/joeblew999/.github.git//tasks/tool-rust.toml?ref=v0.67.1",
+  "git::https://github.com/joeblew999/.github.git//tasks/release.toml?ref=v0.67.1",
 ]
 
 # ── The control panel: this list IS our CI ────────────────────────────────────
@@ -141,6 +141,34 @@ def main [] {
   }
   offline "fixtures/schema/BTLx_2_3_1.xsd" "fixtures/schema/BTLx_2_3_1.offline.xsd"
   print "done — canonical XSDs from design2machine.com; offline copy regenerated"
+}
+'''
+
+# Regenerate the reference/machines.md table from reference/machines.jsonl (the
+# source of truth). Pure nushell.   mise run machines
+[tasks.machines]
+run = '''
+#!/usr/bin/env nu
+def main [] {
+  let rows = (open reference/machines.jsonl | lines | where {|l| ($l | str trim | is-not-empty)} | each {|l| $l | from json })
+  mut out = []
+  for mfr in ($rows | get manufacturer | uniq) {
+    let mrows = ($rows | where manufacturer == $mfr)
+    $out = ($out | append [$"### ($mfr)" "" "| Family | Model | Controller | Interchange in | Notes |" "|--------|-------|------------|----------------|-------|"])
+    for r in $mrows {
+      let fmt = (if $r.format_confirmed {
+        if (($r.format_via | default "") | is-empty) { $r.format } else { $"($r.format) \(via ($r.format_via)\)" }
+      } else { "*(to confirm)*" })
+      $out = ($out | append $"| ($r.family) | ($r.model) | ($r.controller) | ($fmt) | ($r.notes) |")
+    }
+    $out = ($out | append "")
+  }
+  let table = ($out | str join (char newline))
+  let md = (open reference/machines.md --raw | decode utf-8)
+  let before = ($md | split row "<!-- gen:machines -->" | get 0)
+  let after = ($md | split row "<!-- /gen:machines -->" | get 1)
+  $"($before)<!-- gen:machines -->\n\n($table)\n<!-- /gen:machines -->($after)" | save --force reference/machines.md
+  print $"✓ regenerated reference/machines.md table from ($rows | length) machines"
 }
 '''
 
