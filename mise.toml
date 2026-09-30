@@ -1,26 +1,11 @@
+# Project-local tasks only. See MISE-RETIREMENT.md for retired workflows and prerequisites.
 #:schema https://mise.jdx.dev/schema/mise.json
-# factory-btlx — consumes the joeblew999/.github shared mise task
 # library. `mise run ci` is the WHOLE of CI, and runs identically on your machine
-# and on the GitHub matrix (ubuntu + macOS + windows). See the .github README.
 #
-# Rust is owned by rust-toolchain.toml (rustup), NEVER mise — `ci:check-global`
 # enforces this. Global tools (nu, gh, git-cliff) come from
-# `mise run mise:global:bootstrap` (once per machine).
 
-[settings]
-# rust-toolchain.toml is the Rust pin; this makes `mise install` honour it.
-idiomatic_version_file_enable_tools = ["rust"]
-
-[task_config]
-includes = [
-  "git::https://github.com/joeblew999/.github.git//tasks/mise.toml?ref=v0.67.1",
-  "git::https://github.com/joeblew999/.github.git//tasks/ci.toml?ref=v0.67.1",
-  "git::https://github.com/joeblew999/.github.git//tasks/tool-rust.toml?ref=v0.67.1",
-  "git::https://github.com/joeblew999/.github.git//tasks/release.toml?ref=v0.67.1",
-]
 
 # ── The control panel: this list IS our CI ────────────────────────────────────
-#   bootstrap-check — re-runs mise:repo:bootstrap and fails if the generated
 #                     workflows drifted from what's committed.
 #   rust:test       — cargo test --all-targets (compiles the CLI for THIS OS, so
 #                     the matrix builds a linux/macOS/windows binary each).
@@ -28,16 +13,14 @@ includes = [
 #                     real files, on every OS).
 # `validate` is a LOCAL check (it needs xmllint, which isn't on the runners) — it is
 # deliberately NOT in this list. CI proves the code via rust:test + smoke.
-[tasks.ci]
-depends = ["bootstrap-check", "rust:test", "smoke"]
 
-# ── Tuning — bootstrap READS this and projects it into .github/workflows/ ──────
 # Windows is in the RELEASE matrix on purpose: Hundegger Cambium is Windows, so a
 # factory needs the .exe.
+[settings]
+# rust-toolchain.toml is the Rust pin; this makes `mise install` honour it.
+idiomatic_version_file_enable_tools = ["rust"]
+
 [env]
-CI_OS_MATRIX         = '["ubuntu-latest", "macos-latest", "windows-latest"]'   # which OSes CI verifies on
-CI_RELEASE           = "true"                                                  # publish binaries on a git TAG
-CI_RELEASE_OS_MATRIX = '["ubuntu-latest", "macos-latest", "windows-latest"]'   # which OSes publish (incl. windows for Cambium)
 
 # `dist` is the per-OS build task the release workflow runs on a tag. It builds the
 # release binary and stages it in the layout `release:pack` tars up:
@@ -202,23 +185,7 @@ def main [] {
 }
 '''
 
-# Fail if .github/workflows/ drifted from `mise run mise:repo:bootstrap` — keeps the
-# generated CI honest against the shared bootstrap. (.gitattributes pins eol=lf so
 # the git compare is identical on Windows.)
-[tasks.bootstrap-check]
-run = '''
-#!/usr/bin/env nu
-def main [] {
-  ^mise run mise:repo:bootstrap
-  let dirty = (^git status --porcelain .github/workflows | str trim)
-  if ($dirty | is-not-empty) {
-    print --stderr "✗ .github/workflows/ drifted — run `mise run mise:repo:bootstrap` and commit:"
-    ^git --no-pager diff -- .github/workflows
-    exit 1
-  }
-  print "✓ workflows in sync with mise:repo:bootstrap"
-}
-'''
 
 # Download + run the published binary for THIS OS/arch (release assets are public).
 #   mise run run-bin              # latest release
