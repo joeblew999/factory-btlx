@@ -7,6 +7,10 @@
 # enforces this. Global tools (nu, gh, git-cliff) come from
 # `mise run mise:global:bootstrap` (once per machine).
 
+[settings]
+# rust-toolchain.toml is the Rust pin; this makes `mise install` honour it.
+idiomatic_version_file_enable_tools = ["rust"]
+
 [task_config]
 includes = [
   "git::https://github.com/joeblew999/.github.git//tasks/mise.toml?ref=v0.67.1",
